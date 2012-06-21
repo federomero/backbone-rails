@@ -34,6 +34,24 @@
       params.url = getUrl(model) || urlError();
     }
 
+    if(params.formData){
+      params.contentType = false;
+      var data = params.formData;
+      var f = function(name, value, prefix){
+        if(prefix){
+          name = prefix + '['+name+']';
+        }
+        if ($.isPlainObject(value)) {
+          $.each(value, function(n, v){f(n, v, name)});
+        }else{
+          data.append(name, value)
+        }
+      }
+
+      $.each(model.toJSON(), function(n, v){f(n, v, model.paramRoot)});
+      params.data = data;
+    }
+
     // Ensure that we have the appropriate request data.
     if (!params.data && model && (method == 'create' || method == 'update')) {
       params.contentType = 'application/json';
@@ -47,6 +65,7 @@
       }
 
       params.data = JSON.stringify(data)
+
     }
 
     // Don't process data on a non-GET request.
